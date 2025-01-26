@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const grpcAddress = "localhost:50051"
@@ -149,12 +150,33 @@ func ModifySeatHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := grpc.Dial(grpcAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to connect to gRPC server: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	client := ticket.NewTicketServiceClient(conn)
+	resp, err := client.GetAllUsers(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get all users: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
+}
+
 func main() {
 	http.HandleFunc("/purchase-ticket", PurchaseTicketHandler)
 	http.HandleFunc("/get-ticket-receipt", GetTicketReceiptHandler)
 	http.HandleFunc("/view-users-in-section", ViewUsersInSectionHandler)
 	http.HandleFunc("/remove-user", RemoveUserHandler)
 	http.HandleFunc("/modify-seat", ModifySeatHandler)
+	http.HandleFunc("/get-all-users", GetAllUsersHandler)
 
 	fmt.Println("HTTP server is running on port 8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

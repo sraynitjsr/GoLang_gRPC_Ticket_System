@@ -4,6 +4,8 @@ package ticket;
 
 option go_package = "./ticket";
 
+import "google/protobuf/empty.proto";
+
 message User {
     string first_name = 1;
     string last_name = 2;
@@ -60,10 +62,15 @@ message ModifySeatResponse {
     string message = 2;
 }
 
+message GetAllUsersResponse {
+    repeated UserWithSeat users = 1;
+}
+
 service TicketService {
     rpc PurchaseTicket(PurchaseRequest) returns (TicketReceipt);
     rpc GetTicketReceipt(ReceiptRequest) returns (TicketReceipt);
     rpc ViewUsersInSection(SectionRequest) returns (UsersInSection);
     rpc RemoveUser(RemoveUserRequest) returns (RemoveUserResponse);
     rpc ModifySeat(ModifySeatRequest) returns (ModifySeatResponse);
+    rpc GetAllUsers(google.protobuf.Empty) returns (GetAllUsersResponse);
 }

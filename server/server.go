@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type server struct {
@@ -127,6 +128,25 @@ func (s *server) ModifySeat(ctx context.Context, req *ticket.ModifySeatRequest) 
 	}
 
 	return nil, fmt.Errorf("user with email %s not found", req.Email)
+}
+
+func (s *server) GetAllUsers(ctx context.Context, req *emptypb.Empty) (*ticket.GetAllUsersResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var users []*ticket.UserWithSeat
+	for _, userTicketMap := range s.users {
+		for user, receipt := range userTicketMap {
+			users = append(users, &ticket.UserWithSeat{
+				User: user,
+				Seat: receipt.Seat,
+			})
+		}
+	}
+
+	return &ticket.GetAllUsersResponse{
+		Users: users,
+	}, nil
 }
 
 func main() {

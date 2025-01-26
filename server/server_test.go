@@ -7,6 +7,7 @@ import (
 	"sray/ticket"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func createTestServer() *server {
@@ -165,6 +166,39 @@ func TestServer(t *testing.T) {
 			assert.Nil(t, resp)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "user with email")
+		})
+	})
+
+	t.Run("GetAllUsers", func(t *testing.T) {
+		t.Run("All users retrieved", func(t *testing.T) {
+			_, _ = s.PurchaseTicket(context.Background(), &ticket.PurchaseRequest{
+				User:      &ticket.User{Email: "alice@example.com"},
+				PricePaid: 1500,
+				From:      "CityX",
+				To:        "CityY",
+			})
+			_, _ = s.PurchaseTicket(context.Background(), &ticket.PurchaseRequest{
+				User:      &ticket.User{Email: "charlie@example.com"},
+				PricePaid: 500,
+				From:      "CityX",
+				To:        "CityY",
+			})
+
+			resp, err := s.GetAllUsers(context.Background(), &emptypb.Empty{})
+
+			assert.NoError(t, err)
+			assert.NotNil(t, resp)
+			assert.Equal(t, 6, len(resp.Users))
+		})
+
+		t.Run("No users available", func(t *testing.T) {
+			emptyServer := createTestServer()
+
+			resp, err := emptyServer.GetAllUsers(context.Background(), &emptypb.Empty{})
+
+			assert.NoError(t, err)
+			assert.NotNil(t, resp)
+			assert.Equal(t, 0, len(resp.Users))
 		})
 	})
 }

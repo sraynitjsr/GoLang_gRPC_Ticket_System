@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -27,6 +28,7 @@ type TicketServiceClient interface {
 	ViewUsersInSection(ctx context.Context, in *SectionRequest, opts ...grpc.CallOption) (*UsersInSection, error)
 	RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error)
 	ModifySeat(ctx context.Context, in *ModifySeatRequest, opts ...grpc.CallOption) (*ModifySeatResponse, error)
+	GetAllUsers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllUsersResponse, error)
 }
 
 type ticketServiceClient struct {
@@ -82,6 +84,15 @@ func (c *ticketServiceClient) ModifySeat(ctx context.Context, in *ModifySeatRequ
 	return out, nil
 }
 
+func (c *ticketServiceClient) GetAllUsers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllUsersResponse, error) {
+	out := new(GetAllUsersResponse)
+	err := c.cc.Invoke(ctx, "/ticket.TicketService/GetAllUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TicketServiceServer is the server API for TicketService service.
 // All implementations must embed UnimplementedTicketServiceServer
 // for forward compatibility
@@ -91,6 +102,7 @@ type TicketServiceServer interface {
 	ViewUsersInSection(context.Context, *SectionRequest) (*UsersInSection, error)
 	RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error)
 	ModifySeat(context.Context, *ModifySeatRequest) (*ModifySeatResponse, error)
+	GetAllUsers(context.Context, *emptypb.Empty) (*GetAllUsersResponse, error)
 	mustEmbedUnimplementedTicketServiceServer()
 }
 
@@ -112,6 +124,9 @@ func (UnimplementedTicketServiceServer) RemoveUser(context.Context, *RemoveUserR
 }
 func (UnimplementedTicketServiceServer) ModifySeat(context.Context, *ModifySeatRequest) (*ModifySeatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ModifySeat not implemented")
+}
+func (UnimplementedTicketServiceServer) GetAllUsers(context.Context, *emptypb.Empty) (*GetAllUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUsers not implemented")
 }
 func (UnimplementedTicketServiceServer) mustEmbedUnimplementedTicketServiceServer() {}
 
@@ -216,6 +231,24 @@ func _TicketService_ModifySeat_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TicketService_GetAllUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).GetAllUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ticket.TicketService/GetAllUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).GetAllUsers(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TicketService_ServiceDesc is the grpc.ServiceDesc for TicketService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +275,10 @@ var TicketService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ModifySeat",
 			Handler:    _TicketService_ModifySeat_Handler,
+		},
+		{
+			MethodName: "GetAllUsers",
+			Handler:    _TicketService_GetAllUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
