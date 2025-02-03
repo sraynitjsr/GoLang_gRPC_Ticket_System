@@ -13,7 +13,7 @@ protoc --go_out=. --go-grpc_out=. ticket.proto
 
 ---
 
-## REST API Endpoints
+## Start the server and client by running server/server.go and client/client.go files and than use below REST API Endpoints
 
 ### 1. Purchase Ticket
 **Endpoint:** `POST /purchase-ticket`  
