@@ -8,7 +8,7 @@ This repository implements a ticket booking system using gRPC and REST APIs. Bel
 ## Generate Protocol Buffers Code
 Run the following command to generate the necessary Go files for gRPC and protocol buffer support:
 ```bash
-protoc --go_out=. --go-grpc_out=. proto/ticket.proto
+protoc --go_out=. --go-grpc_out=. ticket.proto
 ```
 
 ---
